@@ -72,16 +72,30 @@ test("first-run admin setup creates an admin session and blocks another setup", 
   assert.equal((await request("/api/setup", { method: "POST", body: { username: "other", password: "another-password-123" } })).status, 409);
 });
 
-test("serves the favicon image", async () => {
-  const response = await new Promise((resolve, reject) => {
-    const req = http.get(`${baseUrl}/logowhit.png`, (res) => {
+test("serves frontend assets without exposing project data files", async () => {
+  const get = (route) => new Promise((resolve, reject) => {
+    const req = http.get(`${baseUrl}${route}`, (res) => {
       res.resume();
       res.on("end", () => resolve({ status: res.statusCode, contentType: res.headers["content-type"] }));
     });
     req.on("error", reject);
   });
-  assert.equal(response.status, 200);
-  assert.equal(response.contentType, "image/png");
+
+  const responses = await Promise.all([
+    get("/"),
+    get("/styles.css"),
+    get("/app.js"),
+    get("/lux-decibels-logo.png"),
+    get("/logowhit.png"),
+    get("/store.json"),
+  ]);
+  assert.deepEqual(responses.slice(0, 5).map(({ status }) => status), [200, 200, 200, 200, 200]);
+  assert.equal(responses[0].contentType, "text/html; charset=utf-8");
+  assert.equal(responses[1].contentType, "text/css; charset=utf-8");
+  assert.equal(responses[2].contentType, "text/javascript; charset=utf-8");
+  assert.equal(responses[3].contentType, "image/png");
+  assert.equal(responses[4].contentType, "image/png");
+  assert.equal(responses[5].status, 404);
 });
 
 test("admin creates employees; employee role can only record valid check-in/check-out transitions", async () => {

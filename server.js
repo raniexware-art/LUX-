@@ -5,6 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 
 const ROOT = __dirname;
+const PUBLIC_DIR = path.join(ROOT, "public");
 const DEFAULT_DATA_FILE = path.join(ROOT, "store.json");
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const SCRYPT_COST = 32768;
@@ -625,7 +626,7 @@ function createRequestHandler({ dataFile = process.env.DATA_FILE || DEFAULT_DATA
       if (req.method !== "GET" && req.method !== "HEAD") return sendError(res, 405, "Method not allowed.");
       const relativePath = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
       if (!["index.html", "styles.css", "app.js", "lux-decibels-logo.png", "logowhit.png"].includes(relativePath)) return sendError(res, 404, "Not found.");
-      const filePath = path.join(ROOT, relativePath);
+      const filePath = path.join(PUBLIC_DIR, relativePath);
       const content = fs.readFileSync(filePath);
       res.writeHead(200, { "Content-Type": MIME_TYPES[path.extname(filePath)], "Cache-Control": "no-cache" });
       return res.end(req.method === "HEAD" ? undefined : content);

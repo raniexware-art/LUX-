@@ -26,7 +26,7 @@ Open [http://127.0.0.1:3000](http://127.0.0.1:3000). On first launch, create the
 
 ### Deploy on Vercel with Supabase
 
-Vercel serves the static app and builds the root `[...path].js` handler as a Node function using the custom routes in `vercel.json`. This flat file layout uses Vercel's legacy custom-build configuration. The function stores app data and expiring sessions in Supabase Postgres instead of the function's local filesystem or memory.
+Vercel serves the static app from `public/` and routes API requests to `api/[...path].js`, which uses the handler implementation in the root `[...path].js` file. The `outputDirectory` setting keeps project files such as `store.json` out of the static deployment. The function stores app data and expiring sessions in Supabase Postgres instead of the function's local filesystem or memory.
 
 1. Create a Supabase project and run [`schema.sql`](./schema.sql) in its SQL Editor.
 2. In Vercel Project Settings, add `DATABASE_URL` using the Supabase **transaction pooler** connection string. Keep the password secret; do not commit it or paste it into chat.
